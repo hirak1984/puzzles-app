@@ -191,7 +191,10 @@ enum Tracks {
             last = puzzle
             if !ok { continue }
             if cfg.minimize {
-                for c in shuffled(rnd, Array(given.keys)) {
+                // Sorted: Swift dictionary order is randomized per launch, which
+                // made the same seed generate different puzzles across runs.
+                // Ascending order also matches the web app (JS integer keys).
+                for c in shuffled(rnd, given.keys.sorted()) {
                     let m = given[c]
                     given.removeValue(forKey: c)
                     if !isUnique(rowC, colC, start, end, given) { given[c] = m }
