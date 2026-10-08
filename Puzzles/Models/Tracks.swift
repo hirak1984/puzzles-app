@@ -193,7 +193,7 @@ enum Tracks {
             if cfg.minimize {
                 // Sorted: Swift dictionary order is randomized per launch, which
                 // made the same seed generate different puzzles across runs.
-                // Ascending order also matches the web app (JS integer keys).
+                // The web app (tracks.js) sorts ascending too.
                 for c in shuffled(rnd, given.keys.sorted()) {
                     let m = given[c]
                     given.removeValue(forKey: c)

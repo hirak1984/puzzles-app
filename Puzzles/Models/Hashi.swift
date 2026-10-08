@@ -316,9 +316,16 @@ enum Hashi {
 
         var isolated = Array(repeating: false, count: model.islands.count)
         if allDone && !fullyConnected {
+            // Largest network wins; ties go to the one seen first (Swift
+            // Dictionary order is random per launch, so don't take its max).
             var sizes: [Int: Int] = [:]
-            for r in roots { sizes[r, default: 0] += 1 }
-            let mainRoot = sizes.max { $0.value < $1.value }?.key
+            var order: [Int] = []
+            for r in roots {
+                if sizes[r] == nil { order.append(r) }
+                sizes[r, default: 0] += 1
+            }
+            var mainRoot = order.first
+            for r in order where sizes[r]! > sizes[mainRoot!]! { mainRoot = r }
             isolated = roots.map { $0 != mainRoot }
         }
 

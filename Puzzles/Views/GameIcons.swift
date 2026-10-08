@@ -41,7 +41,7 @@ struct SudokuIcon: View {
                 grid.move(to: pt(18, o)); grid.addLine(to: pt(46, o))
             }
             ctx.stroke(grid, with: .color(Theme.accent.opacity(0.55)), lineWidth: 1.5 * s)
-            var box = Path(CGRect(x: 18 * s, y: 18 * s, width: 28 * s, height: 28 * s))
+            let box = Path(CGRect(x: 18 * s, y: 18 * s, width: 28 * s, height: 28 * s))
             ctx.stroke(box, with: .color(Theme.accent), lineWidth: 2.5 * s)
 
             let cell = 28.0 / 3

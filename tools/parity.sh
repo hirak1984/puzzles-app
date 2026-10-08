@@ -1,16 +1,26 @@
 #!/bin/bash
-# Cross-platform parity check for the puzzle logic.
+# Cross-platform parity check for the puzzle logic (iOS, Android, web).
 #
 # 1. Compiles the iOS Swift puzzle code (Models/RNG, Hashi, Tracks, Sudoku)
 #    on macOS and regenerates shared/fixtures/puzzles.json from it.
 # 2. Runs the Android unit tests, which require the Kotlin port to produce
 #    exactly the same puzzles for the same seeds.
+# 3. Copies the fixture into the website repo (puzzles.hirakonline.com,
+#    default ../puzzles-web, override with PUZZLES_WEB) and runs its JS tests,
+#    which hold the web logic to the same output.
 #
-# Run after ANY change to puzzle generation/solving/status logic on either
+# Run after ANY change to puzzle generation/solving/status logic on any
 # platform. If the fixture changes, commit it together with the matching
-# change on the other platform.
+# change on the other platforms (and the copy in the website repo).
 set -euo pipefail
 cd "$(dirname "$0")/.."
+
+WEB="${PUZZLES_WEB:-../puzzles-web}"
+if [[ ! -f "$WEB/site/js/rng.js" ]]; then
+    echo "!! Website repo not found at $WEB — clone it first:"
+    echo "   git clone https://github.com/hirak1984/puzzles.git $WEB"
+    exit 1
+fi
 
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
@@ -36,4 +46,12 @@ if [[ -z "${JAVA_HOME:-}" ]]; then
     export JAVA_HOME
 fi
 (cd android && ./gradlew -q testDebugUnitTest)
-echo "==> Parity OK: iOS and Android generate identical puzzles"
+
+echo "==> Running web parity tests (puzzles.hirakonline.com logic)"
+mkdir -p "$WEB/tests/fixtures"
+cmp -s shared/fixtures/puzzles.json "$WEB/tests/fixtures/puzzles.json" || {
+    cp shared/fixtures/puzzles.json "$WEB/tests/fixtures/puzzles.json"
+    echo "    web fixture UPDATED — commit $WEB/tests/fixtures/puzzles.json too"
+}
+(cd "$WEB" && node tests/parity.test.mjs && node tests/generate.test.mjs > /dev/null)
+echo "==> Parity OK: iOS, Android and the web generate identical puzzles"

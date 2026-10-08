@@ -9,12 +9,13 @@ stays on the device.
 | iOS / iPadOS 17+ | SwiftUI: `Puzzles/`, `project.yml` | App Store |
 | Android 8.0+ | Kotlin + Jetpack Compose: `android/` | Google Play ([release guide](android/README.md)) |
 
-The two apps are separate native codebases that must stay **feature-identical**.
-Every change goes into both. See [`CLAUDE.md`](CLAUDE.md) for the rule, the
-iOS ⇄ Android file map, and the parity check:
+The two apps and the website ([hirak1984/puzzles](https://github.com/hirak1984/puzzles),
+checked out next to this repo as `../puzzles-web`) must stay **feature-identical**.
+Every change goes into all three. See [`CLAUDE.md`](CLAUDE.md) for the rule, the
+iOS ⇄ Android ⇄ Web file map, and the parity check:
 
 ```bash
-tools/parity.sh   # Swift generates shared/fixtures/puzzles.json → Kotlin must match it exactly
+tools/parity.sh   # Swift writes shared/fixtures/puzzles.json → Kotlin and the web JS must match it exactly
 ```
 
 ## iOS
@@ -40,7 +41,8 @@ Google Play publishing steps.
 
 The generators and solvers (`Puzzles/Models/{RNG,Hashi,Tracks,Sudoku}.swift`, and
 `android/.../model/*.kt`) come from the web app's JS (commit `fd96e25` of
-[hirak1984/puzzles](https://github.com/hirak1984/puzzles)). Sudoku is native-only.
+[hirak1984/puzzles](https://github.com/hirak1984/puzzles)). Sudoku started in the apps and
+was ported back to the web.
 
 A puzzle is fully determined by `(level, seed)`, using the mulberry32 RNG,
 bit-identical on both platforms. That's what lets an unfinished puzzle be resumed:
@@ -48,7 +50,7 @@ the app stores the seed and your moves, and regenerates the same board.
 
 ## Persistence
 
-UserDefaults (iOS) and SharedPreferences (Android) use the same key names:
+UserDefaults (iOS), SharedPreferences (Android) and localStorage (web) use the same key names:
 
 - per-puzzle progress: `puzzles.<game>.<level>.<seed>`
 - the puzzle currently open at each level: `puzzles.current.<game>.<level>`

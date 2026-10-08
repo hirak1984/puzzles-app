@@ -183,7 +183,7 @@ object Tracks {
             last = puzzle
             if (!ok) return@repeat
             if (cfg.minimize) {
-                // Sorted, matching iOS and the web app (see Tracks.swift).
+                // Sorted ascending, matching iOS and the web app (see Tracks.swift).
                 for (c in shuffled(rnd, given.keys.sorted())) {
                     val m = given.getValue(c)
                     given.remove(c)
